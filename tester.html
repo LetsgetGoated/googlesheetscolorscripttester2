@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets Color Script Tester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f5f7;
+            padding: 40px;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #1c1e21;
+        }
+        p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .mock-cell {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-family: monospace;
+        }
+        .mock-cell:focus {
+            border-color: #4285f4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Apps Script Color Preview</h2>
+    <p>Type or paste a 3 or 6-digit hex code (with or without #) into the box below and press <strong>Enter</strong> or click away to trigger the "cell edit" simulation.</p>
+    
+    <!-- Mock Google Sheets Cell -->
+    <input type="text" id="mockCell" class="mock-cell" placeholder="#FFFFFF" value="#34a853">
+</div>
+
+<script>
+    const cellInput = document.getElementById('mockCell');
+
+    // Simulate Google Sheets onEdit behavior
+    cellInput.addEventListener('change', function() {
+        let value = cellInput.value.trim();
+
+        // 1. Format value to ensure it starts with #
+        if (!value.startsWith('#')) {
+            value = '#' + value;
+        }
+
+        // 2. Validate Hex Regex pattern (supports #FFF and #FFFFFF)
+        const hexPattern = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+        if (hexPattern.test(value)) {
+            // Update current text to normalized format
+            cellInput.value = value;
+            
+            // Set cell background color
+            cellInput.style.backgroundColor = value;
+
+            // Optional enhancement: auto-adjust text color for readability (contrast check)
+            const rgb = hexToRgb(value);
+            const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+            cellInput.style.color = (brightness > 128) ? '#000000' : '#FFFFFF';
+        } else {
+            alert('Invalid Hex Code! Please use format like #FF5733 or F53');
+            // Reset to defaults if invalid
+            cellInput.style.backgroundColor = '#ffffff';
+            cellInput.style.color = '#000000';
+        }
+    });
+
+    // Helper function to extract RGB weights for text contrast calculation
+    function hexToRgb(hex) {
+        if (hex.length === 4) {
+            hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        }
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    // Run once on load to show initial state
+    cellInput.dispatchEvent(new Event('change'));
+</script>
+
+</body>
+</html>
